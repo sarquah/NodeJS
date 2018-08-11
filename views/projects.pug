@@ -2,7 +2,7 @@ extends layout
 
 block content
   h1 #{title}
-  ul
+  ul.list-group
     each project, p in projects
-      li= project.name
+      li.list-group-item= project.name
   a(href='/projects/add') Add new project
