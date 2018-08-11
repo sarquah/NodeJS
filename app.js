@@ -3,6 +3,7 @@ const Joi = require('joi');
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 //Database
 mongoose.connect('mongodb://localhost:27017/projectmanagement', {useNewUrlParser: true});
@@ -19,12 +20,17 @@ db.on('error', (error) => {
 const app = express();
 
 //Load models
-const Project = require('./models/project');
+let Project = require('./models/project');
 
 //Set views
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(express.json());
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
 
 //Front end code
 app.get('/', (request, response) => {
@@ -52,6 +58,21 @@ app.get('/projects/add', (request, response) => {
 	response.render('add_project', {
     title: 'Add project'
   });
+});
+
+app.post('/projects/add', (request, response) => {
+  const body = request.body;
+	let project = new Project();
+  project.name = body.name;
+  project.save((error) => {
+    if(error) {
+      console.log(error);
+      return;
+    }
+    else {
+      response.redirect('/projects');
+    }
+  })
 });
 
 //API code
