@@ -1,0 +1,17 @@
+{
+  "name": "mongodbapp",
+  "version": "1.0.0",
+  "description": "Simple project management app",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app"
+  },
+  "author": "Stephen Sarquah",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "joi": "^13.6.0",
+    "mongoose": "^5.2.7",
+    "pug": "^2.0.3"
+  }
+}

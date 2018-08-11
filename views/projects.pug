@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1 #{title}
+  ul
+    each project, p in projects
+      li= project.name
