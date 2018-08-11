@@ -57,6 +57,20 @@ app.get('/projects/', (request, response) => {
   })
 });
 
+app.get('/projects/:id', (request, response) => {
+  const id = request.params.id;
+  Project.findById(id, (error, project) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      response.render('project', {
+        project: project
+      });
+    }
+  })
+});
+
 app.get('/projects/add', (request, response) => {
 	response.render('add_project', {
     title: 'Add project'

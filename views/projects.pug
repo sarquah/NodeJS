@@ -4,5 +4,5 @@ block content
   h1 #{title}
   ul.list-group
     each project, p in projects
-      li.list-group-item= project.name
-  a(href='/projects/add') Add new project
+      li.list-group-item
+        a(href='/projects/'+project._id)=project.name
