@@ -140,6 +140,16 @@ app.post('/projects/edit/:id', (request, response) => {
   })
 });
 
+app.delete('/projects/delete/:id', (request, response) => {
+  let query = {_id: request.params.id}
+  Project.remove(query, (error) => {
+    if(error){
+      console.log(error);
+    }
+    response.send('Success');
+  });
+})
+
 function validateProject(project) {
 	const schema = {
 		name: Joi.string().min(3).required()
