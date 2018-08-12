@@ -3,6 +3,6 @@ extends layout
 block content
   h1 #{title}
   ul.list-group
-    each project, p in projects
+    each project in projects
       li.list-group-item
-        a(href='/projects/'+project._id)=project.name
+        a(href='/projects/project/'+project._id)=project.name

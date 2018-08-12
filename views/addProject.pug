@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  h1 #{title}
+  form(method='POST', action='/projects/add')
+    #form-group
+      label Project name:
+      input.form-control(name='name', type='text')
+      label Project type:
+      input.form-control(name='type', type='text')
+      label Project owner:
+      input.form-control(name='owner', type='text')
+      label Start date:
+      input.form-control(name='startdate', type='text')
+      label End date:
+      input.form-control(name='enddate', type='text')
+      label Project status:
+      input.form-control(name='status', type='text')
+      label Project phase:
+      input.form-control(name='phase', type='text')
+    input.btn.btn-primary(type='submit', value='Submit')

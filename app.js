@@ -57,7 +57,7 @@ app.get('/projects/', (request, response) => {
   })
 });
 
-app.get('/projects/:id', (request, response) => {
+app.get('/projects/project/:id', (request, response) => {
   const id = request.params.id;
   Project.findById(id, (error, project) => {
     if (error) {
@@ -72,7 +72,7 @@ app.get('/projects/:id', (request, response) => {
 });
 
 app.get('/projects/add', (request, response) => {
-	response.render('add_project', {
+	response.render('addProject', {
     title: 'Add project'
   });
 });
@@ -81,6 +81,14 @@ app.post('/projects/add', (request, response) => {
   const body = request.body;
 	let project = new Project();
   project.name = body.name;
+  project.type = body.type;
+  project.owner = body.owner;
+  project.startdate = body.startdate;
+  project.enddate = body.enddate;
+  project.status = body.status;
+  project.phase = body.phase;
+  project.createddate = new Date(Date.now()).toISOString();
+  project.modifieddate = new Date(Date.now()).toISOString();
   project.save((error) => {
     if(error) {
       console.log(error);
@@ -92,55 +100,44 @@ app.post('/projects/add', (request, response) => {
   })
 });
 
-//API code
-app.get('/api/projects', (request, response) => {
-  Project.find({}, (error, projects) => {
+app.get('/projects/edit/:id', (request, response) => {
+  const id = request.params.id;
+  Project.findById(id, (error, project) => {
     if (error) {
       console.log(error);
     }
     else {
-      response.send(projects);
+      response.render('editProject', {
+        title: 'Edit project',
+        project: project
+      });
     }
   })
 });
 
-app.get('/api/projects/:id', (request, response) => {
-	const id = request.params.id;
-	const project = projects.find(p => p.id === parseInt(id));
-	if (!project) return response.status(404).send('The project with the given ID was not found');
-	response.send(project);
-});
+app.post('/projects/edit/:id', (request, response) => {
+  const body = request.body;
+	let project = {};
+  project.name = body.name;
+  project.type = body.type;
+  project.owner = body.owner;
+  project.startdate = body.startdate;
+  project.enddate = body.enddate;
+  project.status = body.status;
+  project.phase = body.phase;
+  project.modifieddate = new Date(Date.now()).toISOString();
 
-app.post('/api/projects', (request, response) => {
-	const body = request.body;
-	const { error } = validateProject(body);
-	if (error) return response.status(400).send(error.details[0].message);
-	const project = {
-		id: projects.length +1,
-		name: body.name
-	};
-	projects.push(project);
-	response.send(project);
-});
+  let query = {_id: request.params.id}
 
-app.put('/api/projects/:id', (request, response) => {
-	const id = request.params.id;
-	const body = request.body;
-	const project = projects.find(p => p.id === parseInt(id));
-	if (!project) return response.status(404).send('The project with the given ID was not found');
-	const { error } = validateProject(body);
-	if (error) return response.status(400).send(error.details[0].message);
-	project.name = body.name;
-	response.send(project);
-});
-
-app.delete('/api/projects/:id', (request, response) => {
-	const id = request.params.id;
-	const project = projects.find(p => p.id === parseInt(id));
-	if (!project) return response.status(404).send('The project with the given ID was not found');
-	const index = projects.indexOf(project);
-	projects.splice(index, 1);
-	response.send(project);
+  Project.update(query, project, (error) => {
+    if(error) {
+      console.log(error);
+      return;
+    }
+    else {
+      response.redirect('/projects');
+    }
+  })
 });
 
 function validateProject(project) {

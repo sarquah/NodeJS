@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 #{project.name}
+  hr
+  a.btn.btn-primary(href='/projects/edit/'+project._id) Edit project
+  a.btn.btn-danger.delete-project(href='#', data-id=project._id) Delete project
+  hr
+  p Project type: #{project.type}
+  p Project owner: #{project.owner}
+  p Start date: #{project.startdate}
+  p End date: #{project.enddate}
+  p Project status: #{project.status}
+  p Project phase: #{project.phase}  
+  
