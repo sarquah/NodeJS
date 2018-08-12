@@ -1,9 +1,10 @@
 //Require packages
-const Joi = require('joi');
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const flash = require('connect-flash');
+const session = require('express-session');
 
 //Database
 mongoose.connect('mongodb://localhost:27017/projectmanagement', {useNewUrlParser: true});
@@ -27,6 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 app.use(express.json());
 
+//Body parser Middleware
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
@@ -35,21 +37,38 @@ app.use(bodyParser.json());
 //Set public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+//Express session Middleware
+app.use(session({
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: true
+}));
+
+//Express messages Middleware
+app.use(require('connect-flash')());
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
+});
+
+//Express validator Middleware
+const { check, validationResult } = require('express-validator/check');
+
 //Front end code
-app.get('/', (request, response) => {
-	response.render('index', {
+app.get('/', (req, res) => {
+	res.render('index', {
     title: 'Project Management Tool',
     description: 'Welcome to the great project management tool. It\'s free and easy to use'
   });
 });
 
-app.get('/projects/', (request, response) => {
+app.get('/projects/', (req, res) => {
   Project.find({}, (error, projects) => {
     if (error) {
       console.log(error);
     }
     else {
-      response.render('projects', {
+      res.render('projects', {
         title: 'Projects',
         projects: projects
       });
@@ -57,57 +76,68 @@ app.get('/projects/', (request, response) => {
   })
 });
 
-app.get('/projects/project/:id', (request, response) => {
-  const id = request.params.id;
+app.get('/projects/project/:id', (req, res) => {
+  const id = req.params.id;
   Project.findById(id, (error, project) => {
     if (error) {
       console.log(error);
     }
     else {
-      response.render('project', {
+      res.render('project', {
         project: project
       });
     }
   })
 });
 
-app.get('/projects/add', (request, response) => {
-	response.render('addProject', {
+app.get('/projects/add', (req, res) => {
+	res.render('addProject', {
     title: 'Add project'
   });
 });
 
-app.post('/projects/add', (request, response) => {
-  const body = request.body;
-	let project = new Project();
-  project.name = body.name;
-  project.type = body.type;
-  project.owner = body.owner;
-  project.startdate = body.startdate;
-  project.enddate = body.enddate;
-  project.status = body.status;
-  project.phase = body.phase;
-  project.createddate = new Date(Date.now()).toISOString();
-  project.modifieddate = new Date(Date.now()).toISOString();
-  project.save((error) => {
-    if(error) {
-      console.log(error);
-      return;
-    }
-    else {
-      response.redirect('/projects');
-    }
-  })
+app.post('/projects/add', (req, res) => {
+  req.checkBody('name', 'Project name is required').notEmpty();
+  let errors = req.validationErrors();
+  if(errors){
+    res.render('addProject', {
+      title: 'Add project',
+      errors: errors
+    });
+  }
+  else {
+    const body = req.body;
+  	let project = new Project();
+    project.name = body.name;
+    project.type = body.type;
+    project.owner = body.owner;
+    project.startdate = body.startdate;
+    project.enddate = body.enddate;
+    project.status = body.status;
+    project.phase = body.phase;
+    project.createddate = new Date(Date.now()).toISOString();
+    project.modifieddate = new Date(Date.now()).toISOString();
+    project.save((error) => {
+      if(error) {
+        console.log(error);
+        return;
+      }
+      else {
+        req.flash('success', 'Project added!');
+        res.redirect('/projects');
+      }
+    });
+  }
 });
 
-app.get('/projects/edit/:id', (request, response) => {
-  const id = request.params.id;
+app.get('/projects/edit/:id', (req, res) => {
+  const id = req.params.id;
   Project.findById(id, (error, project) => {
     if (error) {
       console.log(error);
     }
     else {
-      response.render('editProject', {
+      res.render('editProject', {
         title: 'Edit project',
         project: project
       });
@@ -115,8 +145,8 @@ app.get('/projects/edit/:id', (request, response) => {
   })
 });
 
-app.post('/projects/edit/:id', (request, response) => {
-  const body = request.body;
+app.post('/projects/edit/:id', (req, res) => {
+  const body = req.body;
 	let project = {};
   project.name = body.name;
   project.type = body.type;
@@ -127,7 +157,7 @@ app.post('/projects/edit/:id', (request, response) => {
   project.phase = body.phase;
   project.modifieddate = new Date(Date.now()).toISOString();
 
-  let query = {_id: request.params.id}
+  let query = {_id: req.params.id}
 
   Project.update(query, project, (error) => {
     if(error) {
@@ -135,27 +165,21 @@ app.post('/projects/edit/:id', (request, response) => {
       return;
     }
     else {
-      response.redirect('/projects');
+      req.flash('success','Project updated!');
+      res.redirect('/projects');
     }
   })
 });
 
-app.delete('/projects/delete/:id', (request, response) => {
-  let query = {_id: request.params.id}
+app.delete('/projects/delete/:id', (req, res) => {
+  let query = {_id: req.params.id}
   Project.remove(query, (error) => {
     if(error){
       console.log(error);
     }
-    response.send('Success');
+    res.send('Success');
   });
 })
-
-function validateProject(project) {
-	const schema = {
-		name: Joi.string().min(3).required()
-	};
-	return Joi.validate(project, schema);
-}
 
 //Start application
 const port = process.env.PORT || 3000
