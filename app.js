@@ -64,7 +64,9 @@ app.get('/', (req, res) => {
 
 //Route files
 let projects = require('./routes/projects');
+let users = require('./routes/users');
 app.use('/projects', projects);
+app.use('/users', users);
 
 //Start application
 const port = process.env.PORT || 3000
