@@ -96,16 +96,17 @@ app.get('/projects/add', (req, res) => {
   });
 });
 
-app.post('/projects/add', (req, res) => {
-  req.checkBody('name', 'Project name is required').notEmpty();
-  let errors = req.validationErrors();
-  if(errors){
-    res.render('addProject', {
-      title: 'Add project',
-      errors: errors
-    });
-  }
-  else {
+app.post('/projects/add', [
+    check('name').not().isEmpty().withMessage('Project must have a name')
+  ], (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+      // return res.status(422).json({ errors: errors.array() });
+      res.render('addProject', {
+        title: 'Add project',
+        errors: errors.array()
+      });
+    }
     const body = req.body;
   	let project = new Project();
     project.name = body.name;
@@ -127,7 +128,6 @@ app.post('/projects/add', (req, res) => {
         res.redirect('/projects');
       }
     });
-  }
 });
 
 app.get('/projects/edit/:id', (req, res) => {
