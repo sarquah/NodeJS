@@ -17,17 +17,11 @@ html(lang='en')
             a.nav-link(href='/projects') Projects
           li.nav-item
             a.nav-link(href='/projects/add') Add project
-          //-
-            li.nav-item.dropdown
-              a#dropdown01.nav-link.dropdown-toggle(href='https://example.com', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false') Dropdown
-              .dropdown-menu(aria-labelledby='dropdown01')
-                a.dropdown-item(href='#') Action
-                a.dropdown-item(href='#') Another action
-                a.dropdown-item(href='#') Something else here
-          //
-        form.form-inline.my-2.my-lg-0
-          input.form-control.mr-sm-2(type='text', placeholder='Search', aria-label='Search')
-          button.btn.btn-outline-success.my-2.my-sm-0(type='submit') Search
+        ul.nav.navbar-nav.navbar-right
+          li.nav-item
+            a.nav-link(href='/users/register') Sign up
+          li.nav-item
+            a.nav-link(href='/users/login') Sign in
     main.container(role='main')
       div
         != messages('message', locals)

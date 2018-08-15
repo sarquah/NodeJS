@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 
 //Load User model
 let User = require('../models/user');
@@ -22,17 +23,52 @@ router.post('/register', [
   ], (req, res) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()){
-      return res.status(422).json({ errors: errors.array() });
-      // res.render('addProject', {
-      //   title: 'Add project',
-      //   errors: errors.array()
-      // });
+      // return res.status(422).json({ errors: errors.array() });
+      res.render('register', {
+        errors: errors.array()
+      });
     }
-    const name = req.body.name;
-    const email = req.body.email;
-    const username = req.body.username;
-    const password = req.body.password;
-    const password2 = req.body.password2;
-})
+    let newUser = new User({
+      name: req.body.name,
+      email: req.body.email,
+      username: req.body.username,
+      password: req.body.password
+    });
+
+    bcrypt.genSalt(10, (err,salt) => {
+      bcrypt.hash(newUser.password, salt, (err, hash) => {
+        if(err){
+          console.log(err);
+        }
+        newUser.password = hash;
+        newUser.save((err) => {
+          if(err){
+            console.log(err)
+            return;
+          } else {
+            req.flash('success', 'You are now registered');
+            res.redirect('/users/login');
+          }
+        });
+      });
+    });
+});
+
+router.get('/login', (req,res)=>{
+  res.render('login');
+});
+
+router.post('/login', [
+  check('username').not().isEmpty().withMessage('Username cannot be empty'),
+  check('password').not().isEmpty().withMessage('Password cannot be empty'),
+], (req,res)=>{
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    res.render('login', {
+      errors: errors.array()
+    });
+  }
+  res.redirect('/projects');
+});
 
 module.exports = router;
