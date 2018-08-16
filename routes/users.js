@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const passport = require('passport');
 
 //Load User model
 let User = require('../models/user');
@@ -54,21 +55,30 @@ router.post('/register', [
     });
 });
 
+//Login form
 router.get('/login', (req,res)=>{
   res.render('login');
 });
 
-router.post('/login', [
-  check('username').not().isEmpty().withMessage('Username cannot be empty'),
-  check('password').not().isEmpty().withMessage('Password cannot be empty'),
-], (req,res)=>{
-  const errors = validationResult(req);
-  if(!errors.isEmpty()){
-    res.render('login', {
-      errors: errors.array()
-    });
-  }
-  res.redirect('/projects');
+//Login process
+router.post('/login', (req, res, next)=>{
+  passport.authenticate('local', {
+    successRedirect: '/projects',
+    failureRedirect: '/users/login',
+    failureFlash: true
+  })(req, res, next);
+
+
+//   check('username').not().isEmpty().withMessage('Username cannot be empty'),
+//   check('password').not().isEmpty().withMessage('Password cannot be empty'),
+// ], (req,res)=>{
+//   const errors = validationResult(req);
+//   if(!errors.isEmpty()){
+//     res.render('login', {
+//       errors: errors.array()
+//     });
+//   }
+//   res.redirect('/projects');
 });
 
 module.exports = router;
