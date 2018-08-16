@@ -67,18 +67,13 @@ router.post('/login', (req, res, next)=>{
     failureRedirect: '/users/login',
     failureFlash: true
   })(req, res, next);
-
-
-//   check('username').not().isEmpty().withMessage('Username cannot be empty'),
-//   check('password').not().isEmpty().withMessage('Password cannot be empty'),
-// ], (req,res)=>{
-//   const errors = validationResult(req);
-//   if(!errors.isEmpty()){
-//     res.render('login', {
-//       errors: errors.array()
-//     });
-//   }
-//   res.redirect('/projects');
 });
+
+//Logout
+router.get('/logout', (req, res)=>{
+  req.logout();
+  req.flash('success', 'You are now signed out');
+  res.redirect('/users/login');
+})
 
 module.exports = router;
