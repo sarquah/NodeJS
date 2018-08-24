@@ -9,7 +9,7 @@ let User = require('../models/user');
 //Express validator Middleware
 const { check, validationResult } = require('express-validator/check');
 
-router.get('/project/:id', (req, res) => {
+router.get('/project/:id', ensureAuthenticated, (req, res) => {
   const id = req.params.id;
   Project.findById(id, (error, project) => {
     if (error) {
@@ -26,13 +26,13 @@ router.get('/project/:id', (req, res) => {
   })
 });
 
-router.get('/add', (req, res) => {
+router.get('/add', ensureAuthenticated, (req, res) => {
 	res.render('addProject', {
     title: 'Add project'
   });
 });
 
-router.post('/add', [
+router.post('/add', ensureAuthenticated, [
     check('name').not().isEmpty().withMessage('Project must have a name')
   ], (req, res) => {
     const errors = validationResult(req);
@@ -66,22 +66,27 @@ router.post('/add', [
     });
 });
 
-router.get('/edit/:id', (req, res) => {
+router.get('/edit/:id', ensureAuthenticated, (req, res) => {
   const id = req.params.id;
   Project.findById(id, (error, project) => {
-    if (error) {
-      console.log(error);
-    }
-    else {
-      res.render('editProject', {
-        title: 'Edit project',
-        project: project
-      });
+    if (project.owner!=req.user._id){
+      req.flash('danger', 'Not authorized');
+      res.redirect('/');
+    } else {
+      if (error) {
+        console.log(error);
+      }
+      else {
+        res.render('editProject', {
+          title: 'Edit project',
+          project: project
+        });
+      }
     }
   })
 });
 
-router.post('/edit/:id', (req, res) => {
+router.post('/edit/:id', ensureAuthenticated, (req, res) => {
   const body = req.body;
 	let project = {};
   project.name = body.name;
@@ -107,7 +112,7 @@ router.post('/edit/:id', (req, res) => {
   })
 });
 
-router.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id', ensureAuthenticated, (req, res) => {
   let query = {_id: req.params.id}
   Project.remove(query, (error) => {
     if(error){
@@ -117,7 +122,7 @@ router.delete('/delete/:id', (req, res) => {
   });
 })
 
-router.get('/', (req, res) => {
+router.get('/', ensureAuthenticated, (req, res) => {
   Project.find({}, (error, projects) => {
     if (error) {
       console.log(error);
@@ -131,4 +136,13 @@ router.get('/', (req, res) => {
   })
 });
 
+//Access control
+function ensureAuthenticated(req, res, next) {
+  if(req.isAuthenticated()){
+    return next();
+  } else {
+    req.flash('danger', 'Please sign in');
+    res.redirect('/users/login');
+  }
+}
 module.exports = router;

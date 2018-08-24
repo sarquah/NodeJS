@@ -23,9 +23,6 @@ db.on('error', (error) => {
 //Init app
 const app = express();
 
-//Load models
-let Project = require('./models/project');
-
 //Set views
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');

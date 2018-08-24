@@ -11,12 +11,13 @@ html(lang='en')
       a.navbar-brand(href='/') Project Management
       button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarsExampleDefault', aria-controls='navbarsExampleDefault', aria-expanded='false', aria-label='Toggle navigation')
         span.navbar-toggler-icon
-      #navbarsExampleDefault.collapse.navbar-collapse
+      #navbarsExampleDefault.collapse.navbar-collapse        
         ul.navbar-nav.mr-auto
-          li.nav-item
-            a.nav-link(href='/projects') Projects
-          li.nav-item
-            a.nav-link(href='/projects/add') Add project
+          if user
+            li.nav-item
+              a.nav-link(href='/projects') Projects
+            li.nav-item
+              a.nav-link(href='/projects/add') Add project
         ul.nav.navbar-nav.navbar-right
           if user
             li.nav-item
