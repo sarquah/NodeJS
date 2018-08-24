@@ -3,6 +3,8 @@ const router = express.Router();
 
 //Load Project model
 let Project = require('../models/project');
+//Load User model
+let User = require('../models/user');
 
 //Express validator Middleware
 const { check, validationResult } = require('express-validator/check');
@@ -14,8 +16,11 @@ router.get('/project/:id', (req, res) => {
       console.log(error);
     }
     else {
-      res.render('project', {
-        project: project
+      User.findById(project.owner, (err, user) => {
+        res.render('project', {
+          project: project,
+          owner: user.name
+        });
       });
     }
   })
@@ -42,7 +47,7 @@ router.post('/add', [
   	let project = new Project();
     project.name = body.name;
     project.type = body.type;
-    project.owner = body.owner;
+    project.owner = req.user._id;
     project.startdate = body.startdate;
     project.enddate = body.enddate;
     project.status = body.status;
