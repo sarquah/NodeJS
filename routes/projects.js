@@ -112,14 +112,23 @@ router.post('/edit/:id', ensureAuthenticated, (req, res) => {
   })
 });
 
-router.delete('/delete/:id', ensureAuthenticated, (req, res) => {
+router.delete('/delete/:id', (req, res) => {
+  if(!req.user._id){
+    res.status(500).send();
+  }
   let query = {_id: req.params.id}
-  Project.remove(query, (error) => {
-    if(error){
-      console.log(error);
+  Project.findById(req.params.id,(err, project)=>{
+    if(project.owner!=req.user._id){
+      res.status(500).send();
+    } else {
+      Project.remove(query, (error) => {
+        if(error){
+          console.log(error);
+        }
+        res.send('Success');
+      });
     }
-    res.send('Success');
-  });
+  })
 })
 
 router.get('/', ensureAuthenticated, (req, res) => {
